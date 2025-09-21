@@ -1,0 +1,181 @@
+<!DOCTYPE html><html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>C-14 y Enfriamiento de Newton — Calculadoras interactivas</title>
+<style>
+  :root{
+    --bg:#0f172a; --card:#0b1220; --muted:#94a3b8; --text:#e5e7eb;
+    --accent:#22d3ee; --accent2:#38bdf8; --ok:#10b981; --warn:#f59e0b; --bad:#ef4444;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial; color:var(--text);
+    background: radial-gradient(1400px 700px at 10% -10%, #0b2c40 0%, #0f172a 45%) fixed;}
+  header{padding:28px 18px 8px; text-align:center}
+  h1{margin:0 0 6px; font-weight:800}
+  header p{margin:0;color:var(--muted)}
+  .container{max-width:1200px; margin:16px auto 40px; padding:0 16px}
+  .grid{display:grid; gap:14px; grid-template-columns:repeat(12,1fr)}
+  .card{background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+    border:1px solid rgba(148,163,184,.15); border-radius:16px; padding:16px; backdrop-filter:blur(6px)}
+  .col12{grid-column:span 12}
+  .col6{grid-column:span 12} @media (min-width:1000px){.col6{grid-column:span 6}}
+  .row{display:grid; grid-template-columns:repeat(6,1fr); gap:10px}
+  .field{grid-column:span 3}
+  .field label{display:block;color:var(--muted);font-size:.9rem;margin-bottom:6px}
+  .field input{width:100%;padding:10px 12px;border-radius:12px;border:1px solid rgba(148,163,184,.2);
+    background:var(--card);color:var(--text);outline:none}
+  .field input[readonly]{opacity:.85}
+  .badge{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid rgba(148,163,184,.25);color:var(--muted);font-size:.82rem}
+  .btns{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px}
+  button{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#002;font-weight:800;border:none;border-radius:12px;padding:10px 14px;cursor:pointer}
+  button.secondary{background:var(--card); color:var(--text); border:1px solid rgba(148,163,184,.25)}
+  .metric{background:var(--card); border:1px solid rgba(148,163,184,.18); border-radius:14px; padding:12px; margin-bottom:10px}
+  .metric small{color:var(--muted)} .metric .val{font-size:1.4rem; font-weight:800}
+  .ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  details{margin-top:10px} details summary{cursor:pointer; color:var(--accent2); font-weight:700}
+  pre{white-space:pre-wrap; font-family:ui-monospace,SFMono-Regular,Consolas,Menlo,monospace}
+  .hr{height:1px;background:linear-gradient(90deg,transparent,rgba(148,163,184,.2),transparent);margin:8px 0}
+</style>
+<script>
+  // Carga opcional de MathJax para fórmulas (si hay internet)
+  (function(){var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';s.async=true;document.head.appendChild(s);})();
+</script>
+</head>
+<body>
+<header>
+  <h1>C-14 y Enfriamiento de Newton</h1>
+  <p>Dos calculadoras interactivas con pasos y verificación numérica.</p>
+</header><main class="container grid">
+  <!-- ======================== C-14 ======================== -->
+  <section class="card col6" id="c14">
+    <h2 style="margin:0 0 8px">1) Datación por <span class="badge">Carbono‑14</span></h2>
+    <p class="badge">Modelo: f(t)=f(0)\,e^{kt}. Vida media t_{1/2}\Rightarrow e^{k\,t_{1/2}}=\tfrac12.</p><div class="row" style="margin-top:10px">
+  <div class="field"><label for="c14_half">Vida media t<sub>1/2</sub> (años)</label><input id="c14_half" type="number" step="any" value="5730"></div>
+  <div class="field"><label for="c14_frac">Fracción restante f(t)/f(0)</label><input id="c14_frac" type="number" step="any" value="0.7745"></div>
+  <div class="field"><label for="c14_round">Redondeo (años)</label><input id="c14_round" type="number" step="1" value="1"></div>
+  <div class="field"><label>&nbsp;</label><div class="btns"><button id="c14_calc">Calcular</button><button class="secondary" id="c14_reset">Valores del enunciado</button></div></div>
+</div>
+
+<div class="hr"></div>
+<div class="metric"><small>Constante k (1/año)</small><div class="val" id="c14_k">—</div></div>
+<div class="metric"><small>Edad t (años)</small><div class="val" id="c14_t">—</div></div>
+<div class="metric"><small>Edad redondeada</small><div class="val ok" id="c14_tr">—</div></div>
+
+<details>
+  <summary>Mostrar pasos</summary>
+  <pre id="c14_steps"></pre>
+</details>
+
+  </section>  <!-- ======================== ENFRIAMIENTO ======================== -->  <section class="card col6" id="newton">
+    <h2 style="margin:0 0 8px">2) Ley de Enfriamiento de <span class="badge">Newton</span></h2>
+    <p class="badge">T(t)=T_s+(T_0-T_s)\,e^{-k t}. A partir de dos mediciones, estima k y el tiempo desde la muerte.</p><div class="row" style="margin-top:10px">
+  <div class="field"><label for="n_Ts">Temperatura ambiente Ts (°F)</label><input id="n_Ts" type="number" step="any" value="69"></div>
+  <div class="field"><label for="n_Tn">Temperatura normal del cuerpo T<sub>n</sub> (°F)</label><input id="n_Tn" type="number" step="any" value="98.6"></div>
+  <div class="field"><label for="n_T1">Medición 1 (°F)</label><input id="n_T1" type="number" step="any" value="79.5"></div>
+  <div class="field"><label for="n_T2">Medición 2, 1h después (°F)</label><input id="n_T2" type="number" step="any" value="78.0"></div>
+  <div class="field"><label for="n_time1">Hora Medición 1</label><input id="n_time1" type="time" value="21:18"></div>
+  <div class="field"><label>&nbsp;</label><div class="btns"><button id="n_calc">Calcular</button><button class="secondary" id="n_reset">Valores del enunciado</button></div></div>
+</div>
+
+<div class="hr"></div>
+<div class="metric"><small>Constante k (1/h)</small><div class="val" id="n_k">—</div></div>
+<div class="metric"><small>Tiempo desde la muerte hasta Medición 1 (h)</small><div class="val" id="n_tau">—</div></div>
+<div class="metric"><small>Hora estimada de la muerte</small><div class="val ok" id="n_tod">—</div></div>
+
+<details>
+  <summary>Mostrar pasos</summary>
+  <pre id="n_steps"></pre>
+</details>
+
+  </section>  <!-- ======================== NOTA ======================== -->  <section class="card col12">
+    <h3 style="margin:0 0 6px">Notas</h3>
+    <ul style="margin:8px 0 0 18px; color:var(--muted)">
+      <li>La calculadora de C‑14 sigue exactamente el método pedido: primero determina <em>k</em> con la vida media y luego calcula <em>t</em> para la fracción observada, redondeando al año más cercano.</li>
+      <li>Para Newton: de T_2=T_s+(T_1-T_s)e^{-k} se obtiene k=-\ln\!\big((T_2-T_s)/(T_1-T_s)\big). Luego \n      \tau=\frac1k\ln\!\big((T_n-T_s)/(T_1-T_s)\big) horas antes de la Medición 1.</li>
+    </ul>
+  </section>
+</main><script>
+  const fmt = (x, p=6) => Number.isFinite(x) ? x.toFixed(p) : '—';
+
+  // ================= C-14 =================
+  function c14_compute(){
+    const half = +document.getElementById('c14_half').value;
+    const frac = +document.getElementById('c14_frac').value;
+    const rnd  = Math.max(1, Math.round(+document.getElementById('c14_round').value||1));
+    const k = Math.log(0.5)/half; // e^{k t1/2} = 1/2
+    const t = Math.log(frac)/k;   // f(t)/f(0)=frac
+    const tr = Math.round(t/rnd)*rnd;
+
+    document.getElementById('c14_k').textContent = fmt(k,8);
+    document.getElementById('c14_t').textContent = fmt(t,2);
+    document.getElementById('c14_tr').textContent = `${tr} años`;
+
+    const steps = [
+      `1) Vida media: e^{k t_{1/2}}=1/2  ⇒  k = ln(1/2)/t_{1/2} = ln(0.5)/${half} = ${fmt(k,8)} 1/año`,
+      `2) Fracción observada: f(t)/f(0)=${frac} = e^{k t}  ⇒  t = ln(${frac})/k = ${fmt(t,6)} años`,
+      `3) Redondeo al año más cercano: ${tr} años`
+    ].join('\n');
+    document.getElementById('c14_steps').textContent = steps;
+  }
+  document.getElementById('c14_calc').addEventListener('click', c14_compute);
+  document.getElementById('c14_reset').addEventListener('click', ()=>{
+    document.getElementById('c14_half').value=5730;
+    document.getElementById('c14_frac').value=0.7745;
+    document.getElementById('c14_round').value=1;
+    c14_compute();
+  });
+
+  // ================= Newton =================
+  function parseTimeToHoursSinceMidnight(t){
+    const [hh,mm] = t.split(':').map(Number); return hh + mm/60;
+  }
+  function hoursToHHMM(h){
+    let total = Math.round(h*60); // minutos
+    total = (total%1440 + 1440)%1440; // modulo 24h positivo
+    const hh = Math.floor(total/60), mm = total%60;
+    return `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
+  }
+
+  function newton_compute(){
+    const Ts = +document.getElementById('n_Ts').value;
+    const Tn = +document.getElementById('n_Tn').value;
+    const T1 = +document.getElementById('n_T1').value;
+    const T2 = +document.getElementById('n_T2').value;
+    const time1 = document.getElementById('n_time1').value || '21:18';
+
+    if([Ts,Tn,T1,T2].some(v=>!isFinite(v))){return;}
+
+    const ratio = (T2 - Ts)/(T1 - Ts);
+    const k = -Math.log(ratio); // por hora
+    const tau = (1/k)*Math.log((Tn - Ts)/(T1 - Ts));
+
+    const t1h = parseTimeToHoursSinceMidnight(time1);
+    const tod_h = t1h - tau; // hora estimada de muerte
+
+    document.getElementById('n_k').textContent = fmt(k,6);
+    document.getElementById('n_tau').textContent = fmt(tau,4);
+    document.getElementById('n_tod').textContent = `${hoursToHHMM(tod_h)} (aprox)`;
+
+    const steps = [
+      `Datos: Ts=${Ts}°F, Tn=${Tn}°F, T1=${T1}°F a las ${time1}, T2=${T2}°F a las ${hoursToHHMM(parseTimeToHoursSinceMidnight(time1)+1)}`,
+      `1) De T2 = Ts + (T1 - Ts) e^{-k} ⇒ e^{-k} = (T2 - Ts)/(T1 - Ts) = ${fmt(ratio,6)} ⇒ k = ${fmt(k,6)} 1/h`,
+      `2) De T1 = Ts + (Tn - Ts) e^{-k τ} ⇒ τ = (1/k) ln((Tn - Ts)/(T1 - Ts)) = ${fmt(tau,6)} h`,
+      `3) Hora de muerte ≈ hora(Medición 1) − τ = ${time1} − ${fmt(tau,4)} h = ${hoursToHHMM(tod_h)}`
+    ].join('\n');
+    document.getElementById('n_steps').textContent = steps;
+  }
+  document.getElementById('n_calc').addEventListener('click', newton_compute);
+  document.getElementById('n_reset').addEventListener('click', ()=>{
+    document.getElementById('n_Ts').value=69;
+    document.getElementById('n_Tn').value=98.6;
+    document.getElementById('n_T1').value=79.5;
+    document.getElementById('n_T2').value=78.0;
+    document.getElementById('n_time1').value='21:18';
+    newton_compute();
+  });
+
+  // inicializar
+  window.addEventListener('DOMContentLoaded', ()=>{ c14_compute(); newton_compute(); });
+</script></body>
+</html>
